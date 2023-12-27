@@ -4,6 +4,7 @@ import (
 	"context"
 	"testing"
 
+	"fangaoxs.com/go-elasticsearch/environment"
 	"fangaoxs.com/go-elasticsearch/internal/entity"
 
 	es "github.com/elastic/go-elasticsearch/v8"
@@ -13,6 +14,13 @@ import (
 )
 
 func TestES(t *testing.T) {
+	env, err := environment.Get()
+	if err != nil {
+		t.Error(err)
+	}
+	ESListenAddr := env.RestListenAddr
+	Index := env.ESIndex
+
 	config := es.Config{
 		Addresses: []string{ESListenAddr},
 	}
