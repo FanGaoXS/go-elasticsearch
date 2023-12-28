@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"fangaoxs.com/go-elasticsearch/environment"
-	"fangaoxs.com/go-elasticsearch/internal/entity"
 
 	es "github.com/elastic/go-elasticsearch/v8"
 	"github.com/elastic/go-elasticsearch/v8/typedapi/core/search"
@@ -13,12 +12,20 @@ import (
 	"github.com/google/uuid"
 )
 
+type User struct {
+	UUID string   `json:"uuid"`
+	Name string   `json:"name"`
+	Age  int      `json:"age"`
+	Desc string   `json:"desc"`
+	Tags []string `json:"tags"`
+}
+
 func TestES(t *testing.T) {
 	env, err := environment.Get()
 	if err != nil {
 		t.Error(err)
 	}
-	ESListenAddr := env.RestListenAddr
+	ESListenAddr := env.ESRestAddr
 	Index := env.ESIndex
 
 	config := es.Config{
@@ -47,7 +54,7 @@ func TestES(t *testing.T) {
 		t.Fatal("index应该存在")
 	}
 
-	u := &entity.User{
+	u := &User{
 		UUID: uuid.NewString(),
 		Name: "狂神说Java",
 		Age:  3,
@@ -70,7 +77,7 @@ func TestES(t *testing.T) {
 		t.Fatalf("doc: %s 应该存在", u.UUID)
 	}
 
-	u = &entity.User{
+	u = &User{
 		UUID: uuid.NewString(),
 		Name: "狂神说Go",
 		Age:  4,
@@ -93,7 +100,7 @@ func TestES(t *testing.T) {
 		t.Fatalf("doc: %s 应该存在", u.UUID)
 	}
 
-	u = &entity.User{
+	u = &User{
 		UUID: uuid.NewString(),
 		Name: "狂神说C++",
 		Age:  4,
