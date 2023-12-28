@@ -84,16 +84,6 @@ func (c *crawlerImpl) CollectGoods(keyword string, pageNo int) ([]*Good, error) 
 	return res, nil
 }
 
-type Board struct {
-	Title string `json:"title"`
-	Desc  string `json:"desc"`
-	Index string `json:"index"`
-	Link  string `json:"link"`
-
-	Type BoardType `json:"type"`
-	From BoardFrom `json:"from"`
-}
-
 func (c *crawlerImpl) CollectBoardBaidu(typ BoardType) ([]*Board, error) {
 	panic("implement me")
 }

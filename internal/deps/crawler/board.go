@@ -43,3 +43,13 @@ var toBoardFromString = map[BoardFrom]string{
 func ToBoardFromString(bf BoardFrom) string {
 	return toBoardFromString[bf]
 }
+
+type Board struct {
+	Title string `json:"title"`
+	Desc  string `json:"desc"`
+	Index string `json:"index"`
+	Link  string `json:"link"`
+
+	Type BoardType `json:"type"`
+	From BoardFrom `json:"from"`
+}

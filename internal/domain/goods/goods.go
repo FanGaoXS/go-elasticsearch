@@ -10,7 +10,7 @@ import (
 )
 
 type Goods interface {
-	SearchGoods(ctx context.Context) ([]*Good, error)
+	SearchGoods(ctx context.Context, keyword string, pageNo, pageSize int64) ([]*Good, error)
 }
 
 func New(
@@ -20,14 +20,16 @@ func New(
 	es elasticsearch.Client,
 ) (Goods, error) {
 	ctx := context.Background()
-	goods := make([]*Good, 0, 300)
 
+	goods := make([]*Good, 0, 300)
+	// init data
 	for i := 0; i < 5; i++ {
 		gds, err := crawler.CollectGoods("java", i+1)
 		if err != nil {
 			return nil, err
 		}
 		goods = append(goods, gds...)
+
 		gds, err = crawler.CollectGoods("vue", i+1)
 		if err != nil {
 			return nil, err
@@ -38,6 +40,7 @@ func New(
 	if err := es.InsertGoods(ctx, goods); err != nil {
 		return nil, err
 	}
+	logger.Infof("init %d goods into elasticsearch success", len(goods))
 
 	return &goodsImpl{
 		env:    env,
@@ -55,8 +58,6 @@ type goodsImpl struct {
 
 type Good = elasticsearch.Good
 
-func (i *goodsImpl) SearchGoods(ctx context.Context) ([]*Good, error) {
-	res := make([]*Good, 0)
-
-	return res, nil
+func (i *goodsImpl) SearchGoods(ctx context.Context, keyword string, pageNo, pageSize int64) ([]*Good, error) {
+	return i.es.SearchGoods(ctx, keyword, int(pageNo), int(pageSize))
 }

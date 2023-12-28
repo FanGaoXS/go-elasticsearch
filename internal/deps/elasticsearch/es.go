@@ -2,7 +2,7 @@ package elasticsearch
 
 import (
 	"context"
-	"github.com/elastic/go-elasticsearch/v8/typedapi/core/search"
+	"encoding/json"
 
 	"fangaoxs.com/go-elasticsearch/environment"
 	"fangaoxs.com/go-elasticsearch/internal/deps/crawler"
@@ -10,10 +10,13 @@ import (
 	"fangaoxs.com/go-elasticsearch/internal/infras/logger"
 
 	es "github.com/elastic/go-elasticsearch/v8"
+	"github.com/elastic/go-elasticsearch/v8/typedapi/core/search"
+	"github.com/elastic/go-elasticsearch/v8/typedapi/types"
 )
 
 type Client interface {
 	InsertGoods(ctx context.Context, goods []*Good) error
+	SearchGoods(ctx context.Context, keyword string, pageNo, pageSize int) ([]*Good, error)
 }
 
 func New(env environment.Env, logger logger.Logger) (Client, error) {
@@ -70,13 +73,29 @@ func (e *esImpl) InsertGoods(ctx context.Context, goods []*Good) error {
 	return nil
 }
 
-func (e *esImpl) SearchGoods(ctx context.Context) ([]*Good, error) {
-	res := make([]*Good, 0)
-
-	r := &search.Request{}
+func (e *esImpl) SearchGoods(ctx context.Context, keyword string, pageNo, pageSize int) ([]*Good, error) {
+	res := make([]*Good, 0, pageSize)
+	from := (pageNo - 1) * pageSize
+	r := &search.Request{
+		Query: &types.Query{
+			Match: map[string]types.MatchQuery{
+				"title": {Query: keyword},
+			},
+		},
+		From: &from,
+		Size: &pageSize,
+	}
 	resp, err := e.es.Search().Index(e.index).Request(r).Do(ctx)
 	if err != nil {
 		return nil, err
+	}
+	for _, hit := range resp.Hits.Hits {
+		var g Good
+		if err = json.Unmarshal(hit.Source_, &g); err != nil {
+			return nil, err
+		}
+
+		res = append(res, &g)
 	}
 
 	return res, nil
