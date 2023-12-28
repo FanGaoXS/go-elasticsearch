@@ -1,0 +1,28 @@
+version: "3"
+services:
+  es:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.6.1
+    container_name: elasticsearch
+    environment:
+      - xpack.security.enabled=false
+      - discovery.type=single-node
+      - network.host=0.0.0.0
+      - ES_JAVA_OPTS=-Xms256m -Xmx256m
+      - ELASTIC_PASSWORD=password
+    volumes:
+      - ${PWD}/testdata/es/data:/usr/share/elasticsearch/data
+      - ${PWD}/testdata/es/logs:/usr/share/elasticsearch/logs
+      - ${PWD}/testdata/es/plugins:/usr/share/elasticsearch/plugins
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    restart: on-failure
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.6.1
+    container_name: kibana
+    ports:
+      - "5601:5601"
+    restart: on-failure
+    depends_on:
+      - es

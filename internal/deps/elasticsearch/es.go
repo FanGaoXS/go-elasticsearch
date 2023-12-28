@@ -16,7 +16,9 @@ import (
 
 type Client interface {
 	InsertGoods(ctx context.Context, goods []*Good) error
-	SearchGoods(ctx context.Context, keyword string, pageNo, pageSize int) ([]*Good, error)
+
+	SearchGoodsByTerm(ctx context.Context, isHighlight bool, keyword string, pageNo, pageSize int) ([]*Good, error)
+	SearchGoodsByMatch(ctx context.Context, isHighlight bool, keyword string, pageNo, pageSize int) ([]*Good, error)
 }
 
 func New(env environment.Env, logger logger.Logger) (Client, error) {
@@ -41,7 +43,17 @@ func New(env environment.Env, logger logger.Logger) (Client, error) {
 			return nil, errors.Newf(errors.Internal, err, "delete index: %s failed", index)
 		}
 	}
-	if _, err = c.Indices.Create(index).Do(ctx); err != nil {
+
+	var (
+		analyzer = "ik_smart"
+		mappings = &types.TypeMapping{
+			Properties: map[string]types.Property{
+				"title": types.TextProperty{Analyzer: &analyzer},
+			},
+		} // analyzer: ik_smart on title field
+	)
+
+	if _, err = c.Indices.Create(index).Mappings(mappings).Do(ctx); err != nil {
 		return nil, errors.Newf(errors.Internal, err, "create index: %s failed", index)
 	}
 
@@ -73,26 +85,88 @@ func (e *esImpl) InsertGoods(ctx context.Context, goods []*Good) error {
 	return nil
 }
 
-func (e *esImpl) SearchGoods(ctx context.Context, keyword string, pageNo, pageSize int) ([]*Good, error) {
-	res := make([]*Good, 0, pageSize)
+func (e *esImpl) SearchGoodsByTerm(ctx context.Context, isHighlight bool, keyword string, pageNo, pageSize int) ([]*Good, error) {
+	var hl *types.Highlight
+	if isHighlight {
+		hl = &types.Highlight{
+			Fields: map[string]types.HighlightField{
+				"title": {},
+			},
+		}
+	}
 	from := (pageNo - 1) * pageSize
 	r := &search.Request{
 		Query: &types.Query{
-			Match: map[string]types.MatchQuery{
-				"title": {Query: keyword},
+			Term: map[string]types.TermQuery{
+				"title": {
+					Value: keyword,
+				},
 			},
 		},
-		From: &from,
-		Size: &pageSize,
+		From:      &from,
+		Size:      &pageSize,
+		Highlight: hl,
 	}
 	resp, err := e.es.Search().Index(e.index).Request(r).Do(ctx)
 	if err != nil {
 		return nil, err
 	}
+
+	res := make([]*Good, 0, pageSize)
 	for _, hit := range resp.Hits.Hits {
 		var g Good
 		if err = json.Unmarshal(hit.Source_, &g); err != nil {
 			return nil, err
+		}
+
+		if isHighlight {
+			g.Title = hit.Highlight["title"][0]
+
+		}
+
+		res = append(res, &g)
+	}
+
+	return res, nil
+}
+
+func (e *esImpl) SearchGoodsByMatch(ctx context.Context, isHighlight bool, keyword string, pageNo, pageSize int) ([]*Good, error) {
+	var hl *types.Highlight
+	if isHighlight {
+		hl = &types.Highlight{
+			Fields: map[string]types.HighlightField{
+				"title": {},
+			},
+		}
+	}
+	from := (pageNo - 1) * pageSize
+	r := &search.Request{
+		Query: &types.Query{
+			Match: map[string]types.MatchQuery{
+				"title": {
+					Query: keyword,
+				},
+			},
+		},
+		From:      &from,
+		Size:      &pageSize,
+		Highlight: hl,
+	}
+	resp, err := e.es.Search().Index(e.index).Request(r).Do(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	res := make([]*Good, 0, pageSize)
+	for _, hit := range resp.Hits.Hits {
+		var g Good
+		if err = json.Unmarshal(hit.Source_, &g); err != nil {
+			return nil, err
+		}
+
+		if isHighlight {
+			g.Title = hit.Highlight["title"][0]
+
 		}
 
 		res = append(res, &g)

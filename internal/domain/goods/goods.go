@@ -6,11 +6,20 @@ import (
 	"fangaoxs.com/go-elasticsearch/environment"
 	"fangaoxs.com/go-elasticsearch/internal/deps/crawler"
 	"fangaoxs.com/go-elasticsearch/internal/deps/elasticsearch"
+	"fangaoxs.com/go-elasticsearch/internal/infras/errors"
 	"fangaoxs.com/go-elasticsearch/internal/infras/logger"
 )
 
+type SearchType int
+
+const (
+	SearchTypeInvalid SearchType = iota
+	SearchTypeTerm
+	SearchTypeMatch
+)
+
 type Goods interface {
-	SearchGoods(ctx context.Context, keyword string, pageNo, pageSize int64) ([]*Good, error)
+	SearchGoods(ctx context.Context, highlight bool, searchType SearchType, keyword string, pageNo, pageSize int64) ([]*Good, error)
 }
 
 func New(
@@ -58,6 +67,14 @@ type goodsImpl struct {
 
 type Good = elasticsearch.Good
 
-func (i *goodsImpl) SearchGoods(ctx context.Context, keyword string, pageNo, pageSize int64) ([]*Good, error) {
-	return i.es.SearchGoods(ctx, keyword, int(pageNo), int(pageSize))
+func (i *goodsImpl) SearchGoods(ctx context.Context, highlight bool, searchType SearchType, keyword string, pageNo, pageSize int64) ([]*Good, error) {
+	if searchType == SearchTypeInvalid {
+		return nil, errors.Newf(errors.InvalidArgument, nil, "unsupported search type")
+	}
+
+	if searchType == SearchTypeTerm {
+		return i.es.SearchGoodsByTerm(ctx, highlight, keyword, int(pageNo), int(pageSize))
+	}
+
+	return i.es.SearchGoodsByMatch(ctx, highlight, keyword, int(pageNo), int(pageSize))
 }

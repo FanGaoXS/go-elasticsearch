@@ -1,13 +1,14 @@
 package rest
 
 import (
+	"net/http"
+	"strconv"
+	"strings"
+
 	"fangaoxs.com/go-elasticsearch/environment"
 	"fangaoxs.com/go-elasticsearch/internal/domain/goods"
 	"fangaoxs.com/go-elasticsearch/internal/infras/errors"
 	"fangaoxs.com/go-elasticsearch/internal/infras/logger"
-	"net/http"
-	"strconv"
-	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -36,6 +37,17 @@ func (h *handlers) SearchGoods() gin.HandlerFunc {
 			WrapGinError(c, errors.New(errors.InvalidArgument, nil, "invalid q: empty"))
 			return
 		}
+
+		highlight := false
+		if strings.ToLower(c.Query("highlight")) == "true" {
+			highlight = true
+		}
+
+		searchType := goods.SearchTypeTerm
+		if strings.ToLower(c.Query("type")) == "match" {
+			searchType = goods.SearchTypeMatch
+		}
+
 		var page int64 = 1
 		var size int64 = 10
 		var err error
@@ -54,7 +66,7 @@ func (h *handlers) SearchGoods() gin.HandlerFunc {
 			}
 		}
 		ctx := c.Request.Context()
-		res, err := h.goods.SearchGoods(ctx, q, page, size)
+		res, err := h.goods.SearchGoods(ctx, highlight, searchType, q, page, size)
 		if err != nil {
 			WrapGinError(c, err)
 			return
