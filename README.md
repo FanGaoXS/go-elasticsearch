@@ -18,6 +18,4 @@ github.com/google/wire
 
 ## search API
 
-```http request
-GET localhost:8090/api/v1/search/goods?q={keyword}&type={searchType}&highlight={isHighlight}
-```
+`GET localhost:8090/api/v1/search/goods?q={keyword}&type={searchType}&highlight={isHighlight}`
