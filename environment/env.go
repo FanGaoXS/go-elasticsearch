@@ -20,9 +20,12 @@ type Env struct {
 
 	BypassAuth bool
 
-	JDCookie   string
-	ESRestAddr string
-	ESIndex    string
+	ESRestAddr    string
+	ESGoodsIndex  string
+	ESBoardsIndex string
+
+	JDCookie string
+	TBCookie string
 }
 
 func Get() (Env, error) {
@@ -70,13 +73,6 @@ func Get() (Env, error) {
 		}
 	}
 
-	var jdCookie string
-	if os.Getenv("JD_COOKIE") == "" {
-		return Env{}, fmt.Errorf("jd cookie is required")
-	} else {
-		jdCookie = os.Getenv("JD_COOKIE")
-	}
-
 	var esRestAddr string
 	if os.Getenv("ES_REST_ADDR") == "" {
 		esRestAddr = "http://localhost:9200"
@@ -84,11 +80,32 @@ func Get() (Env, error) {
 		esRestAddr = os.Getenv("ES_REST_ADDR")
 	}
 
-	var esIndex string
-	if os.Getenv("ES_INDEX") == "" {
-		esIndex = "goods"
+	var esGoodsIndex string
+	if os.Getenv("ES_GOODS_INDEX") == "" {
+		esGoodsIndex = "goods"
 	} else {
-		esIndex = os.Getenv("ES_INDEX")
+		esGoodsIndex = os.Getenv("ES_GOODS_INDEX")
+	}
+
+	var esBoardsIndex string
+	if os.Getenv("ES_BOARDS_INDEX") == "" {
+		esBoardsIndex = "boards"
+	} else {
+		esBoardsIndex = os.Getenv("ES_BOARDS_INDEX")
+	}
+
+	var jdCookie string
+	if os.Getenv("JD_COOKIE") == "" {
+		return Env{}, fmt.Errorf("jd cookie is required")
+	} else {
+		jdCookie = os.Getenv("JD_COOKIE")
+	}
+
+	var tbCookie string
+	if os.Getenv("TB_COOKIE") == "" {
+		return Env{}, fmt.Errorf("taobao cookie is required")
+	} else {
+		tbCookie = os.Getenv("TB_COOKIE")
 	}
 
 	return Env{
@@ -97,9 +114,11 @@ func Get() (Env, error) {
 		LogLevel:       logLevel,
 		RestListenAddr: restListenAddr,
 		BypassAuth:     bypassAuth,
-		JDCookie:       jdCookie,
 		ESRestAddr:     esRestAddr,
-		ESIndex:        esIndex,
+		ESGoodsIndex:   esGoodsIndex,
+		ESBoardsIndex:  esBoardsIndex,
+		JDCookie:       jdCookie,
+		TBCookie:       tbCookie,
 	}, nil
 }
 

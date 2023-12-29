@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"fangaoxs.com/go-elasticsearch/environment"
+	"fangaoxs.com/go-elasticsearch/internal/domain/boards"
 	"fangaoxs.com/go-elasticsearch/internal/domain/goods"
 	"fangaoxs.com/go-elasticsearch/internal/infras/errors"
 	"fangaoxs.com/go-elasticsearch/internal/infras/logger"
@@ -13,11 +14,12 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func newHandlers(env environment.Env, logger logger.Logger, goods goods.Goods) (*handlers, error) {
+func newHandlers(env environment.Env, logger logger.Logger, goods goods.Goods, boards boards.Boards) (*handlers, error) {
 	return &handlers{
 		env:    env,
 		logger: logger,
 		goods:  goods,
+		boards: boards,
 	}, nil
 }
 
@@ -25,7 +27,8 @@ type handlers struct {
 	env    environment.Env
 	logger logger.Logger
 
-	goods goods.Goods
+	goods  goods.Goods
+	boards boards.Boards
 }
 
 func (h *handlers) SearchGoods() gin.HandlerFunc {
@@ -66,12 +69,23 @@ func (h *handlers) SearchGoods() gin.HandlerFunc {
 			}
 		}
 		ctx := c.Request.Context()
-		res, err := h.goods.SearchGoods(ctx, highlight, searchType, q, page, size)
-		if err != nil {
-			WrapGinError(c, err)
-			return
+		var res []*goods.Good
+		var err error
+		if strings.ToLower(c.Query("type")) == "match" {
+			res, err = h.goods.SearchGoodsByMatch(ctx, highlight, q, page, size)
+			if err != nil {
+				WrapGinError(c, err)
+				return
+			}
 		}
 
 		c.JSON(http.StatusOK, res)
+	}
+}
+
+func (h *handlers) SearchHotpots() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		// GET
+
 	}
 }

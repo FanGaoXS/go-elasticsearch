@@ -26,6 +26,7 @@ func New(
 	c := v1.Group("search")
 	{
 		c.GET("goods", h.SearchGoods())
+		c.GET("hotpots", h.SearchHotpots())
 	}
 
 	s := &http.Server{

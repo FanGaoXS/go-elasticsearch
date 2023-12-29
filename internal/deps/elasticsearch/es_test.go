@@ -26,7 +26,7 @@ func TestES(t *testing.T) {
 		t.Error(err)
 	}
 	ESListenAddr := env.ESRestAddr
-	Index := env.ESIndex
+	Index := "for_test"
 
 	config := es.Config{
 		Addresses: []string{ESListenAddr},

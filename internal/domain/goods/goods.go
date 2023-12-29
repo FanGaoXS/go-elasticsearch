@@ -5,41 +5,35 @@ import (
 
 	"fangaoxs.com/go-elasticsearch/environment"
 	"fangaoxs.com/go-elasticsearch/internal/deps/crawler"
-	"fangaoxs.com/go-elasticsearch/internal/deps/elasticsearch"
-	"fangaoxs.com/go-elasticsearch/internal/infras/errors"
+	es "fangaoxs.com/go-elasticsearch/internal/deps/elasticsearch"
 	"fangaoxs.com/go-elasticsearch/internal/infras/logger"
 )
 
-type SearchType int
-
-const (
-	SearchTypeInvalid SearchType = iota
-	SearchTypeTerm
-	SearchTypeMatch
-)
+type Good = es.Good
 
 type Goods interface {
-	SearchGoods(ctx context.Context, highlight bool, searchType SearchType, keyword string, pageNo, pageSize int64) ([]*Good, error)
+	SearchGoodsByTerm(ctx context.Context, highlight bool, keyword string, pageNo, pageSize int64) ([]*Good, error)
+	SearchGoodsByMatch(ctx context.Context, highlight bool, keyword string, pageNo, pageSize int64) ([]*Good, error)
 }
 
 func New(
 	env environment.Env,
 	logger logger.Logger,
-	crawler crawler.Client,
-	es elasticsearch.Client,
+	c crawler.Client,
+	es es.Client,
 ) (Goods, error) {
 	ctx := context.Background()
 
 	goods := make([]*Good, 0, 300)
 	// init data
 	for i := 0; i < 5; i++ {
-		gds, err := crawler.CollectGoods("java", i+1)
+		gds, err := c.CollectGoods(ctx, crawler.GoodFromJinDong, "java", i+1)
 		if err != nil {
 			return nil, err
 		}
 		goods = append(goods, gds...)
 
-		gds, err = crawler.CollectGoods("vue", i+1)
+		gds, err = c.CollectGoods(ctx, crawler.GoodFromJinDong, "vue", i+1)
 		if err != nil {
 			return nil, err
 		}
@@ -62,19 +56,13 @@ type goodsImpl struct {
 	env    environment.Env
 	logger logger.Logger
 
-	es elasticsearch.Client
+	es es.Client
 }
 
-type Good = elasticsearch.Good
+func (i *goodsImpl) SearchGoodsByTerm(ctx context.Context, highlight bool, keyword string, pageNo, pageSize int64) ([]*Good, error) {
+	return i.es.SearchGoodsByTerm(ctx, highlight, keyword, int(pageNo), int(pageSize))
+}
 
-func (i *goodsImpl) SearchGoods(ctx context.Context, highlight bool, searchType SearchType, keyword string, pageNo, pageSize int64) ([]*Good, error) {
-	if searchType == SearchTypeInvalid {
-		return nil, errors.Newf(errors.InvalidArgument, nil, "unsupported search type")
-	}
-
-	if searchType == SearchTypeTerm {
-		return i.es.SearchGoodsByTerm(ctx, highlight, keyword, int(pageNo), int(pageSize))
-	}
-
+func (i *goodsImpl) SearchGoodsByMatch(ctx context.Context, highlight bool, keyword string, pageNo, pageSize int64) ([]*Good, error) {
 	return i.es.SearchGoodsByMatch(ctx, highlight, keyword, int(pageNo), int(pageSize))
 }
