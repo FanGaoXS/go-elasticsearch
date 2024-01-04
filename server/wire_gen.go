@@ -10,6 +10,7 @@ import (
 	"fangaoxs.com/go-elasticsearch/environment"
 	"fangaoxs.com/go-elasticsearch/internal/deps/crawler"
 	"fangaoxs.com/go-elasticsearch/internal/deps/elasticsearch"
+	"fangaoxs.com/go-elasticsearch/internal/domain/boards"
 	"fangaoxs.com/go-elasticsearch/internal/domain/goods"
 	"fangaoxs.com/go-elasticsearch/internal/infras/logger"
 	"github.com/gin-gonic/gin"
@@ -30,7 +31,11 @@ func initServer(env environment.Env, logger2 logger.Logger, engine *gin.Engine) 
 	if err != nil {
 		return nil, err
 	}
-	server, err := newServer(env, logger2, engine, goodsGoods)
+	boardsBoards, err := boards.New(env, logger2, client, elasticsearchClient)
+	if err != nil {
+		return nil, err
+	}
+	server, err := newServer(env, logger2, engine, goodsGoods, boardsBoards)
 	if err != nil {
 		return nil, err
 	}

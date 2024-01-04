@@ -6,14 +6,14 @@ import (
 	"fangaoxs.com/go-elasticsearch/environment"
 	"fangaoxs.com/go-elasticsearch/internal/deps/crawler"
 	es "fangaoxs.com/go-elasticsearch/internal/deps/elasticsearch"
-	"fangaoxs.com/go-elasticsearch/internal/infras/errors"
 	"fangaoxs.com/go-elasticsearch/internal/infras/logger"
 )
 
-type Board = crawler.Board
+type Board = es.Board
 
 type Boards interface {
-	SearchBoards(ctx context.Context, highlight bool, searchType es.SearchType, keyword string, pageNo, pageSize int64) ([]*Board, error)
+	SearchBoardsByTerm(ctx context.Context, highlight bool, keyword string, pageNo, pageSize int64) ([]*Board, error)
+	SearchBoardsByMatch(ctx context.Context, highlight bool, keyword string, pageNo, pageSize int64) ([]*Board, error)
 }
 
 func New(
@@ -48,14 +48,11 @@ type boardsImpl struct {
 	es es.Client
 }
 
-func (i *boardsImpl) SearchBoards(ctx context.Context, highlight bool, searchType es.SearchType, keyword string, pageNo, pageSize int64) ([]*Board, error) {
-	if searchType == es.SearchTypeInvalid {
-		return nil, errors.Newf(errors.InvalidArgument, nil, "unsupported search type")
-	}
+func (i *boardsImpl) SearchBoardsByTerm(ctx context.Context, highlight bool, keyword string, pageNo, pageSize int64) ([]*Board, error) {
+	return i.es.SearchBoardsByTerm(ctx, highlight, keyword, int(pageNo), int(pageSize))
 
-	if searchType == es.SearchTypeTerm {
-		return i.es.SearchBoardsByTerm(ctx, highlight, keyword, int(pageNo), int(pageSize))
-	}
+}
 
+func (i *boardsImpl) SearchBoardsByMatch(ctx context.Context, highlight bool, keyword string, pageNo, pageSize int64) ([]*Board, error) {
 	return i.es.SearchBoardsByMatch(ctx, highlight, keyword, int(pageNo), int(pageSize))
 }

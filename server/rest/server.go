@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"fangaoxs.com/go-elasticsearch/environment"
+	"fangaoxs.com/go-elasticsearch/internal/domain/boards"
 	"fangaoxs.com/go-elasticsearch/internal/domain/goods"
 	"fangaoxs.com/go-elasticsearch/internal/infras/logger"
 
@@ -16,8 +17,9 @@ func New(
 	logger logger.Logger,
 	router *gin.Engine,
 	goods goods.Goods,
+	boards boards.Boards,
 ) (*Server, error) {
-	h, err := newHandlers(env, logger, goods)
+	h, err := newHandlers(env, logger, goods, boards)
 	if err != nil {
 		return nil, err
 	}
@@ -25,8 +27,10 @@ func New(
 	v1 := router.Group("api/v1")
 	c := v1.Group("search")
 	{
-		c.GET("goods", h.SearchGoods())
-		c.GET("hotpots", h.SearchHotpots())
+		c.GET("goods/term", h.SearchGoodsByTerm())
+		c.GET("goods/match", h.SearchGoodsByMatch())
+		c.GET("boards/term", h.SearchBoardsByTerm())
+		c.GET("boards/match", h.SearchBoardsByMatch())
 	}
 
 	s := &http.Server{

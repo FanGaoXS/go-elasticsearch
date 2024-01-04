@@ -31,7 +31,7 @@ type handlers struct {
 	boards boards.Boards
 }
 
-func (h *handlers) SearchGoods() gin.HandlerFunc {
+func (h *handlers) SearchGoodsByTerm() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// GET
 
@@ -46,46 +46,127 @@ func (h *handlers) SearchGoods() gin.HandlerFunc {
 			highlight = true
 		}
 
-		searchType := goods.SearchTypeTerm
-		if strings.ToLower(c.Query("type")) == "match" {
-			searchType = goods.SearchTypeMatch
+		page, _ := strconv.ParseInt(c.Query("page"), 10, 64)
+		if page == 0 {
+			page = 1
+		}
+		size, _ := strconv.ParseInt(c.Query("size"), 10, 64)
+		if size == 0 {
+			size = 10
 		}
 
-		var page int64 = 1
-		var size int64 = 10
-		var err error
-		if pageStr, ok := c.GetQuery("page"); ok {
-			page, err = strconv.ParseInt(pageStr, 10, 64)
-			if err != nil {
-				WrapGinError(c, err)
-				return
-			}
-		}
-		if sizeStr, ok := c.GetQuery("size"); ok {
-			size, err = strconv.ParseInt(sizeStr, 10, 64)
-			if err != nil {
-				WrapGinError(c, err)
-				return
-			}
-		}
 		ctx := c.Request.Context()
-		var res []*goods.Good
-		var err error
-		if strings.ToLower(c.Query("type")) == "match" {
-			res, err = h.goods.SearchGoodsByMatch(ctx, highlight, q, page, size)
-			if err != nil {
-				WrapGinError(c, err)
-				return
-			}
+		res, err := h.goods.SearchGoodsByTerm(ctx, highlight, q, page, size)
+		if err != nil {
+			WrapGinError(c, err)
+			return
 		}
 
 		c.JSON(http.StatusOK, res)
 	}
 }
 
-func (h *handlers) SearchHotpots() gin.HandlerFunc {
+func (h *handlers) SearchGoodsByMatch() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// GET
 
+		q := c.Query("q")
+		if q = strings.TrimSpace(q); q == "" {
+			WrapGinError(c, errors.New(errors.InvalidArgument, nil, "invalid q: empty"))
+			return
+		}
+
+		highlight := false
+		if strings.ToLower(c.Query("highlight")) == "true" {
+			highlight = true
+		}
+
+		page, _ := strconv.ParseInt(c.Query("page"), 10, 64)
+		if page == 0 {
+			page = 1
+		}
+		size, _ := strconv.ParseInt(c.Query("size"), 10, 64)
+		if size == 0 {
+			size = 10
+		}
+
+		ctx := c.Request.Context()
+		res, err := h.goods.SearchGoodsByMatch(ctx, highlight, q, page, size)
+		if err != nil {
+			WrapGinError(c, err)
+			return
+		}
+
+		c.JSON(http.StatusOK, res)
+	}
+}
+
+func (h *handlers) SearchBoardsByTerm() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		// GET
+
+		q := c.Query("q")
+		if q = strings.TrimSpace(q); q == "" {
+			WrapGinError(c, errors.New(errors.InvalidArgument, nil, "invalid q: empty"))
+			return
+		}
+
+		highlight := false
+		if strings.ToLower(c.Query("highlight")) == "true" {
+			highlight = true
+		}
+
+		page, _ := strconv.ParseInt(c.Query("page"), 10, 64)
+		if page == 0 {
+			page = 1
+		}
+		size, _ := strconv.ParseInt(c.Query("size"), 10, 64)
+		if size == 0 {
+			size = 10
+		}
+		
+		ctx := c.Request.Context()
+		res, err := h.boards.SearchBoardsByTerm(ctx, highlight, q, page, size)
+		if err != nil {
+			WrapGinError(c, err)
+			return
+		}
+
+		c.JSON(http.StatusOK, res)
+	}
+}
+
+func (h *handlers) SearchBoardsByMatch() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		// GET
+
+		q := c.Query("q")
+		if q = strings.TrimSpace(q); q == "" {
+			WrapGinError(c, errors.New(errors.InvalidArgument, nil, "invalid q: empty"))
+			return
+		}
+
+		highlight := false
+		if strings.ToLower(c.Query("highlight")) == "true" {
+			highlight = true
+		}
+
+		page, _ := strconv.ParseInt(c.Query("page"), 10, 64)
+		if page == 0 {
+			page = 1
+		}
+		size, _ := strconv.ParseInt(c.Query("size"), 10, 64)
+		if size == 0 {
+			size = 10
+		}
+
+		ctx := c.Request.Context()
+		res, err := h.boards.SearchBoardsByMatch(ctx, highlight, q, page, size)
+		if err != nil {
+			WrapGinError(c, err)
+			return
+		}
+
+		c.JSON(http.StatusOK, res)
 	}
 }

@@ -7,6 +7,7 @@ import (
 	"fangaoxs.com/go-elasticsearch/environment"
 	"fangaoxs.com/go-elasticsearch/internal/deps/crawler"
 	"fangaoxs.com/go-elasticsearch/internal/deps/elasticsearch"
+	"fangaoxs.com/go-elasticsearch/internal/domain/boards"
 	"fangaoxs.com/go-elasticsearch/internal/domain/goods"
 	"fangaoxs.com/go-elasticsearch/internal/infras/logger"
 
@@ -19,6 +20,7 @@ func initServer(env environment.Env, logger logger.Logger, engine *gin.Engine) (
 		crawler.New,
 		elasticsearch.New,
 		goods.New,
+		boards.New,
 		newServer,
 	))
 }

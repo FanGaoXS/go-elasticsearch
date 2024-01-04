@@ -19,7 +19,15 @@ github.com/google/wire
 
 ## search API
 
-`GET localhost:8090/api/v1/search/goods?q={keyword}&type={searchType}&highlight={isHighlight}`
+```http request
+GET localhost:8090/api/v1/search/goods/term?q={keyword}&page={page}&size={size}highlight={isHighlight}
+
+GET localhost:8090/api/v1/search/goods/match?q={keyword}&page={page}&size={size}highlight={isHighlight}
+
+GET localhost:8090/api/v1/search/boards/term?q={keyword}&page={page}&size={size}highlight={isHighlight}
+
+GET localhost:8090/api/v1/search/boards/match?q={keyword}&page={page}&size={size}highlight={isHighlight}
+```
 
 
 ## run docker-compose

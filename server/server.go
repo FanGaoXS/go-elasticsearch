@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"fangaoxs.com/go-elasticsearch/environment"
+	"fangaoxs.com/go-elasticsearch/internal/domain/boards"
 	"fangaoxs.com/go-elasticsearch/internal/domain/goods"
 	"fangaoxs.com/go-elasticsearch/internal/infras/logger"
 	"fangaoxs.com/go-elasticsearch/server/rest"
@@ -25,8 +26,9 @@ func newServer(
 	logger logger.Logger,
 	httpServer *gin.Engine,
 	goods goods.Goods,
+	boards boards.Boards,
 ) (*Server, error) {
-	restServer, err := rest.New(env, logger, httpServer, goods)
+	restServer, err := rest.New(env, logger, httpServer, goods, boards)
 	if err != nil {
 		return nil, err
 	}
