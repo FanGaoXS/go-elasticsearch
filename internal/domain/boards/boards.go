@@ -24,6 +24,7 @@ func New(
 ) (Boards, error) {
 	ctx := context.Background()
 
+	logger.Info("collecting boards from baidu...")
 	boards, err := c.CollectBoards(ctx, crawler.BoardFromBaidu, crawler.BoardTypeRealtime, 0)
 	if err != nil {
 		return nil, err

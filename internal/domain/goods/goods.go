@@ -24,9 +24,10 @@ func New(
 ) (Goods, error) {
 	ctx := context.Background()
 
+	logger.Info("collecting goods from JD...")
 	goods := make([]*Good, 0, 300)
 	// init data
-	for i := 0; i < 5; i++ {
+	for i := 0; i < 0; i++ {
 		gds, err := c.CollectGoods(ctx, crawler.GoodFromJinDong, "java", i+1)
 		if err != nil {
 			return nil, err
