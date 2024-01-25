@@ -1,14 +1,13 @@
 version: "3"
 services:
-  es:
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.6.1
-    container_name: elasticsearch
+  my-es:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.12.0
     environment:
       - xpack.security.enabled=false
       - discovery.type=single-node
       - network.host=0.0.0.0
       - ES_JAVA_OPTS=-Xms256m -Xmx256m
-      - ELASTIC_PASSWORD=password
+      # - ELASTIC_PASSWORD=password
     volumes:
       - ${PWD}/testdata/es/data:/usr/share/elasticsearch/data
       - ${PWD}/testdata/es/logs:/usr/share/elasticsearch/logs
@@ -18,11 +17,21 @@ services:
       - "9300:9300"
     restart: on-failure
 
-  kibana:
-    image: docker.elastic.co/kibana/kibana:8.6.1
-    container_name: kibana
+  go-es:
+    image: go-es:latest
+    environment:
+      - APP_NAME=go-es
+      - APP_VERSION=v1.0.0
+      - LOG_LEVEL=INFO
+      - REST_LISTEN_ADDR=0.0.0.0:8099
+      - BYPASS_AUTH=true
+      - ES_REST_ADDR=http://my-es:9200
+      - ES_GOODS_INDEX=goods
+      - ES_BOARDS_INDEX=boards
+      - JD_COOKIE=NULL
+      - TB_COOKIE=NULL
     ports:
-      - "5601:5601"
+      - 8099:8099
     restart: on-failure
     depends_on:
-      - es
+      - my-es

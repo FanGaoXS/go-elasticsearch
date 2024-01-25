@@ -87,10 +87,14 @@ func (e *esImpl) initGoodsIndex(ctx context.Context) error {
 	}
 
 	var (
-		analyzer = "ik_smart"
-		mappings = &types.TypeMapping{
+		analyzer       = "ik_max_word"
+		searchAnalyzer = "ik_smart"
+		mappings       = &types.TypeMapping{
 			Properties: map[string]types.Property{
-				"title": types.TextProperty{Analyzer: &analyzer},
+				"title": types.TextProperty{
+					Analyzer:       &analyzer,
+					SearchAnalyzer: &searchAnalyzer,
+				},
 			},
 		} // analyzer: ik_smart on title field
 	)
@@ -216,10 +220,14 @@ func (e *esImpl) initBoardsIndex(ctx context.Context) error {
 	}
 
 	var (
-		analyzer = "ik_smart"
-		mappings = &types.TypeMapping{
+		analyzer       = "ik_max_word"
+		searchAnalyzer = "ik_smart"
+		mappings       = &types.TypeMapping{
 			Properties: map[string]types.Property{
-				"title": types.TextProperty{Analyzer: &analyzer},
+				"title": types.TextProperty{
+					Analyzer:       &analyzer,
+					SearchAnalyzer: &searchAnalyzer,
+				},
 			},
 		} // analyzer: ik_smart on title field
 	)

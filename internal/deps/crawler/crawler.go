@@ -91,9 +91,10 @@ func (c *crawlerImpl) collectGoodsFromJD(ctx context.Context, keyword string, pa
 		res = append(res, g)
 	})
 
+	cookie := c.env.JDCookie
 	h := http.Header{}
 	h.Set("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
-	h.Set("Cookie", c.env.JDCookie)
+	h.Set("Cookie", cookie)
 	if err := collector.Request(http.MethodGet, u.String(), nil, nil, h); err != nil {
 		return nil, err
 	}
