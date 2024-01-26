@@ -30,5 +30,20 @@ GET localhost:8090/api/v1/search/boards/match?q={keyword}&page={page}&size={size
 ```
 
 
-## run docker-compose
-`docker-compose up`
+## docker
+
+### build docker image
+```bash
+make docker-build
+```
+
+### run docker image
+```bash
+docker run go-es
+```
+
+### run with docker-compose
+```bash
+make docker-build
+docker-compose up
+```
