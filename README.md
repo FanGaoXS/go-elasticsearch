@@ -32,13 +32,9 @@ GET localhost:8090/api/v1/search/boards/match?q={keyword}&page={page}&size={size
 
 ## docker
 
-### build docker image
-```bash
-make docker-build
-```
-
 ### run docker image
 ```bash
+make docker-build
 docker run go-es
 ```
 
