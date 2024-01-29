@@ -3,10 +3,10 @@ services:
   my-es:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.12.0
     environment:
-      - xpack.security.enabled=false
-      - discovery.type=single-node
-      - network.host=0.0.0.0
-      - ES_JAVA_OPTS=-Xms256m -Xmx256m
+      xpack.security.enabled: false
+      discovery.type: single-node
+      network.host: 0.0.0.0
+      ES_JAVA_OPTS: -Xms256m -Xmx256m
       # - ELASTIC_PASSWORD=password
     volumes:
       - ${PWD}/testdata/es/data:/usr/share/elasticsearch/data
@@ -20,18 +20,18 @@ services:
   go-es:
     image: go-es:latest
     environment:
-      - APP_NAME=go-es
-      - APP_VERSION=v1.0.0
-      - LOG_LEVEL=INFO
-      - REST_LISTEN_ADDR=0.0.0.0:8099
-      - BYPASS_AUTH=true
-      - ES_REST_ADDR=http://my-es:9200
-      - ES_GOODS_INDEX=goods
-      - ES_BOARDS_INDEX=boards
-      - JD_COOKIE=NULL
-      - TB_COOKIE=NULL
+      APP_NAME: go-es
+      APP_VERSION: v1.0.0
+      LOG_LEVEL: INFO
+      REST_LISTEN_ADDR: 0.0.0.0:8099
+      BYPASS_AUTH: true
+      ES_REST_ADDR: http://my-es:9200
+      ES_GOODS_INDEX: goods
+      ES_BOARDS_INDEX: boards
+      JD_COOKIE: NULL
+      TB_COOKIE: NULL
     ports:
-      - 8099:8099
+      - "8099:8099"
     restart: on-failure
     depends_on:
       - my-es
