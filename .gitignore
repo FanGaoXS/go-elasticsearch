@@ -27,3 +27,5 @@ coverage.html
 
 dist/
 docs
+
+testdata/
